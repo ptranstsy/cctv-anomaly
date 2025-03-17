@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CCTV Anomaly Detection</title>
+    <style>
+        #video {
+            border: 2px solid black;
+            width: 640px;
+            height: 480px;
+        }
+        #alerts {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>CCTV Anomaly Detection</h1>
+    <img id="video" src="{{ url_for('video_feed') }}">
+    <div id="alerts">
+        <h3>Alerts:</h3>
+        <ul id="alert-list"></ul>
+    </div>
+
+    <script>
+        // Sinkronisasi alert dari Firestore
+        const db = firebase.firestore();
+        const alertsRef = db.collection('alerts');
+        const alertList = document.getElementById('alert-list');
+
+        alertsRef.onSnapshot((snapshot) => {
+            alertList.innerHTML = ''; // Kosongkan daftar
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    const data = change.doc.data();
+                    const li = document.createElement('li');
+                    li.textContent = `${data.Date} - ${data.CamID}: ${data.Description} (Level: ${data.Level})`;
+                    alertList.appendChild(li);
+                }
+            });
+        });
+    </script>
+    <!-- Tambahkan Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js"></script>
+    <script>
+        // Konfigurasi Firebase (ganti dengan konfigurasi Anda)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+</body>
+</html>
